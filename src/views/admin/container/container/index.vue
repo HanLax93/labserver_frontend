@@ -1,0 +1,157 @@
+<template>
+  <div class="app-container" v-loading="listLoading">
+    <el-table :data="list" fit highlight-current-row>
+      <el-table-column align="center" label="容器id" width="210">
+        <template slot-scope="scope">
+          {{ scope.row.dockerID }}
+        </template>
+      </el-table-column>
+      <el-table-column label="名称" width="150" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.name }}
+        </template>
+      </el-table-column>
+      <el-table-column label="端口" align="center" width="200">
+        <template slot-scope="scope">
+          {{ scope.row.port }}
+        </template>
+      </el-table-column>
+      <el-table-column label="创建时间" prop="create_at" align="center" width="250">
+        <template slot-scope="scope">
+          <i class="el-icon-time" style="margin-right: 3px;" />
+          <span>{{ formatDate(scope.row.createTime) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column class-name="status-col" label="容器状态" width="110" align="center" prop="running">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.running" active-color="#13ce66" inactive-color="#ff4949" :active-value="1"
+            :inactive-value="0" :disabled="scope.row.running === 1 || isLoading" @change="startRunning(scope.row)" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" prop="sshStatus" label="ssh状态" width="110">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.sshStatus" active-color="#13ce66" inactive-color="#ff4949" :active-value="1"
+            :inactive-value="0" :disabled="scope.row.sshStatus === 1 || isLoadingSSH"
+            @change="startRunningSSH(scope.row)" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" class-name="status-col" label="删除容器" width="110">
+        <template slot-scope="scope">
+          <el-button type="danger" icon="el-icon-delete" size="mini" title="删除"
+            @click="removeContainer(scope.row.name)" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" prop="margin" />
+    </el-table>
+  </div>
+</template>
+
+<script>
+import api from '@/api/admin/container/container'
+import moment from 'moment'
+
+export default {
+  data() {
+    return {
+      list: [],
+      listLoading: false,
+      isLoading: false,
+      isLoadingSSH: false
+    }
+  },
+  created() {
+    this.fetchData()
+    this.listLoading = true
+  },
+  methods: {
+    fetchData() {
+      api.allContainers()
+        .then(response => {
+          this.listLoading = false
+          if (response.code === 20000) {
+            this.list = response.data
+          } else {
+            this.$message.error(response.msg)
+          }
+        })
+    },
+    checkBtn(row) {
+      return row.permission === 1
+    },
+    startRunning(row) {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.isLoading = true
+      this.isLoadingSSH = true
+      api.startRunning(row.name)
+        .then(response => {
+          this.isLoading = false
+          this.isLoadingSSH = false
+          if (response.code === 20000) {
+            this.$message.success('操作成功')
+          } else {
+            this.$message.error(response.msg)
+          }
+          this.fetchData()
+          loading.close()
+        })
+    },
+    startRunningSSH(row) {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.isLoadingSSH = true
+      api.startRunningSSH(row.name)
+        .then(response => {
+          this.isLoadingSSH = false
+          if (response.code === 20000) {
+            this.$message.success('操作成功')
+          } else {
+            this.$message.error(response.msg)
+          }
+          loading.close()
+          this.fetchData()
+        })
+    },
+    removeContainer(name) {
+      this.$confirm('此操作将永久删除该容器, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        api.removeContainer(name)
+          .then(response => {
+            loading.close()
+            if (response.code === 20000) {
+              this.$message.success('删除成功')
+              this.fetchData()
+            } else {
+              this.$message.error(response.msg)
+            }
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+    },
+    formatDate(rawDate) {
+      return moment(rawDate).format('YYYY-MM-DD HH:mm:ss')
+    }
+  }
+}
+</script>
