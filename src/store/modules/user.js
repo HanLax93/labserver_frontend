@@ -10,7 +10,8 @@ const getDefaultState = () => {
 
     buttons: [], // 新增
     menus: '', // 新增
-    curUserId: 0 // 新增
+    curUserId: 0, // 新增
+    permission: 0
   }
 }
 
@@ -41,6 +42,10 @@ const mutations = {
 
   SET_CURUSERID: (state, curUserId) => {
     state.curUserId = curUserId
+  },
+
+  SET_PERMISSION: (state, permission) => {
+    state.permission = permission
   }
 }
 
@@ -82,6 +87,7 @@ const actions = {
         commit('SET_BUTTONS', data.buttons)
         commit('SET_MENUS', data.routers)
         commit('SET_CURUSERID', data.id)
+        commit('SET_PERMISSION', data.permission)
         resolve(data)
       }).catch(error => {
         reject(error)

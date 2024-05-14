@@ -37,7 +37,6 @@ export default {
       const catUrl = `https://api.thecatapi.com/v1/images/search?api_key=${catAccessKey}`
       const urls = [dogUrl, catUrl, dogUrl, catUrl, catUrl, dogUrl]
       var url = urls[Math.floor(Math.random() * urls.length)]
-      console.log(dogUrl)
 
       fetch(url)
         .then(response => response.json())

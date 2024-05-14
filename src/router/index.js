@@ -59,6 +59,11 @@ export const constantRoutes = [
     path: '/user/signup',
     component: () => import('@/views/user/signup/index'),
     hidden: true,
+  },
+
+  {
+    path: '/test',
+    component: () => import('@/views/help/test'),
   }
 
   // {

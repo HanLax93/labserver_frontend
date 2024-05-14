@@ -8,6 +8,7 @@ const getters = {
   // 新增
   buttons: state => state.user.buttons,
   menus: state => state.user.menus,
-  curUserId: state => state.user.curUserId
+  curUserId: state => state.user.curUserId,
+  permission: state => state.user.permission
 }
 export default getters

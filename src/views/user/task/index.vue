@@ -1,10 +1,6 @@
 <template>
   <div class="app-container" v-loading="listLoading">
-    <el-table
-      :data="list"
-      fit
-      highlight-current-row
-    >
+    <el-table :data="list" fit highlight-current-row>
       <el-table-column label="名称" width="150" align="center">
         <template slot-scope="scope">
           {{ scope.row.name }}
@@ -68,11 +64,11 @@ export default {
     },
     approve(name) {
       const loading = this.$loading({
-          lock: true,
-          text: 'Loading',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.isLoading = true
       api.approve(name)
         .then(response => {
