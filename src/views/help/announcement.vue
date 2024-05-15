@@ -221,7 +221,8 @@ export default {
     },
     closeDialog() {
       const imagesPreviewExists = document.getElementsByClassName('el-image-viewer__wrapper')[0];
-      if (!imagesPreviewExists) {
+      const fullScreenVmEditor = document.getElementsByClassName('v-md-editor--fullscreen')[0];
+      if (!imagesPreviewExists && !fullScreenVmEditor) {
         this.dialogVisible = false
       }
     },

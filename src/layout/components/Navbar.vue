@@ -267,9 +267,9 @@ export default {
       this.question = this.emptyAnnouncement;
     },
     closeDialog() {
-      const imagesPreviewExists = document.getElementsByClassName('el-image-viewer__wrapper')[0];
-      console.log(imagesPreviewExists)
-      if (!imagesPreviewExists) {
+      const imagesPreviewExists = document.getElementsByClassName('el-image-viewer__wrapper')[0]
+      const fullScreenVmEditor = document.getElementsByClassName('v-md-editor--fullscreen')[0]
+      if (!imagesPreviewExists && !fullScreenVmEditor) {
         this.threadDialogVisible = false
         this.QADialogVisible = false
       }
