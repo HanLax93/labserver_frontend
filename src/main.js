@@ -14,6 +14,20 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+// v-md-editor
+import VueMarkdownEditor from '@kangc/v-md-editor'
+import vuepressTheme from '@kangc/v-md-editor/lib/theme/vuepress.js'
+import createEmojiPlugin from '@kangc/v-md-editor/lib/plugins/emoji/index'
+import '@kangc/v-md-editor/lib/style/base-editor.css'
+import '@kangc/v-md-editor/lib/theme/style/vuepress.css'
+import '@kangc/v-md-editor/lib/plugins/emoji/emoji.css'
+
+import Prism from 'prismjs'
+
+VueMarkdownEditor.use(vuepressTheme, {
+  Prism
+})
+
 import hasBtnPermission from '@/utils/btn-permission'
 Vue.prototype.$hasBP = hasBtnPermission
 
@@ -21,6 +35,9 @@ import formCreate from '@form-create/element-ui'
 import FcDesigner from '@form-create/designer'
 Vue.use(formCreate)
 Vue.use(FcDesigner)
+
+VueMarkdownEditor.use(createEmojiPlugin())
+Vue.use(VueMarkdownEditor)
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

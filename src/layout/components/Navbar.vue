@@ -28,7 +28,7 @@
         </el-dropdown-menu>
       </el-dropdown>
 
-      <el-dialog title="修改" :visible.sync="dialogVisible" width="40%">
+      <el-dialog title="修改" :visible.sync="dialogVisible" width="40%" top="8vh">
         <el-form ref="dataForm" :model="user" label-width="100px" size="small" style="padding-right: 40px">
           <el-form-item label="密码" prop="password">
             <el-input v-model="user.password" type="password" />
@@ -40,7 +40,7 @@
         </span>
       </el-dialog>
 
-      <el-dialog title="新增公告" :visible.sync="threadDialogVisible" width="30%">
+      <el-dialog title="新增公告" :visible.sync="threadDialogVisible" width="45%" top="8vh" :before-close="closeDialog">
         <el-form>
           <!-- 可见性编辑 -->
           <el-form-item label="仅管理员可见">
@@ -74,7 +74,9 @@
           </el-form-item>
           <!-- 内容编辑 -->
           <el-form-item label="内容">
-            <el-input type="textarea" v-model="announcement.description" />
+            <v-md-editor left-toolbar="undo redo clear | h bold italic strikethrough quote | link code | emoji"
+              v-model="announcement.description" height="200px">
+            </v-md-editor>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -85,14 +87,14 @@
       </el-dialog>
 
       <!-- 新增问题 -->
-      <el-dialog title="新增问题" :visible.sync="QADialogVisible" width="30%">
+      <el-dialog title="新增问题" :visible.sync="QADialogVisible" width="45%" top="8vh" :before-close="closeDialog">
         <el-form>
-        <!-- 可见性编辑 -->
-        <el-form-item v-if="permission == 1" label="仅管理员可见">
-          <br>
-          <el-switch v-model="question.forAdmin" active-color="#13ce66" inactive-color="#ff4949"
-            :active-value="1" :inactive-value="0" />
-        </el-form-item>
+          <!-- 可见性编辑 -->
+          <el-form-item v-if="permission == 1" label="仅管理员可见">
+            <br>
+            <el-switch v-model="question.forAdmin" active-color="#13ce66" inactive-color="#ff4949" :active-value="1"
+              :inactive-value="0" />
+          </el-form-item>
           <!-- 标题编辑 -->
           <el-form-item label="标题">
             <el-input v-model="question.title" />
@@ -119,7 +121,9 @@
           </el-form-item>
           <!-- 内容编辑 -->
           <el-form-item label="内容">
-            <el-input type="textarea" v-model="question.description" />
+            <v-md-editor left-toolbar="undo redo clear | h bold italic strikethrough quote | link code | emoji"
+              v-model="question.description" height="200px">
+            </v-md-editor>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -220,9 +224,15 @@ export default {
       });
     },
     addThread() {
+      this.announcementCachedImages = []
+      this.announcementCachedImgsPreviewList = []
+      this.announcement = this.emptyAnnouncement
       this.threadDialogVisible = true;
     },
     addQuestion() {
+      this.questionCachedImages = []
+      this.questionCachedImagesPreviewList = []
+      this.question = this.emptyAnnouncement
       this.QADialogVisible = true;
     },
     base64ToBlob(base64) {
@@ -256,6 +266,14 @@ export default {
       this.questionCachedImages = []
       this.question = this.emptyAnnouncement;
     },
+    closeDialog() {
+      const imagesPreviewExists = document.getElementsByClassName('el-image-viewer__wrapper')[0];
+      console.log(imagesPreviewExists)
+      if (!imagesPreviewExists) {
+        this.threadDialogVisible = false
+        this.QADialogVisible = false
+      }
+    },
     save() {
       this.threadDialogVisible = false;
       api_1.updateAnnouncement(null, this.resolveImages(this.announcementCachedImages), this.announcement).then((res) => {
@@ -271,10 +289,11 @@ export default {
             type: "error",
           });
         }
+        // 处理本地缓存
+        this.announcement = this.emptyAnnouncement
+        this.announcementCachedImages = [];
+        this.announcementCachedImgsPreviewList = [];
       });
-      // 处理本地缓存
-      this.announcementCachedImages = [];
-      this.announcementCachedImgsPreviewList = [];
     },
     saveQuestion() {
       this.QADialogVisible = false;
@@ -291,6 +310,9 @@ export default {
             type: "error",
           });
         }
+        this.questionCachedImages = []
+        this.questionCachedImagesPreviewList = []
+        this.question = this.emptyAnnouncement
       });
     },
     handleFileChange(event) {
@@ -420,6 +442,17 @@ export default {
   }
 }
 
+::v-deep .el-collapse-item, ::v-deep .el-form-item {
+    .el-collapse-item__content {
+        padding-bottom: 0;
+    }
+
+    .el-image-viewer__canvas img {
+        max-height: 80% !important;
+        max-width: 80% !important;
+    }
+}
+
 .collapse-image-container {
   height: 200px;
   width: 200px;
@@ -437,6 +470,8 @@ export default {
   display: inline-flex;
   margin-right: 5px;
   margin-bottom: 5px;
+  border: grey 2px solid;
+  border-radius: 10px;
 }
 
 .close-button {
@@ -469,7 +504,6 @@ export default {
   font-size: 1.5em;
   font-weight: bold;
   border-radius: 10px;
-  top: 2px;
 }
 
 .upload-button {

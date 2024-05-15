@@ -26,9 +26,7 @@
                         </div>
                     </el-image>
                 </div>
-                <div>
-                    {{ question.description }}
-                </div>
+                <v-md-editor class="description" :value="question.description" mode="preview"></v-md-editor>
                 <el-collapse v-if="question.ansDescription !== null">
                     <el-collapse-item>
                         <div slot="title" class="collapse-title">
@@ -46,27 +44,32 @@
                                 </div>
                             </el-image>
                         </div>
-                        <div>
-                            {{ question.ansDescription }}
-                        </div>
+                        <v-md-editor class="description" :value="question.ansDescription" mode="preview"></v-md-editor>
                     </el-collapse-item>
                 </el-collapse>
             </el-collapse-item>
         </el-collapse>
 
         <!-- edit dialog -->
-        <el-dialog title="编辑问题" :visible.sync="dialogVisible" width="30%">
+        <el-dialog title="编辑问题" :visible.sync="dialogVisible" width="45%" top="8vh" :before-close="closeDialog">
             <el-collapse>
                 <!-- 问题 -->
-                <el-collapse-item title="问题">
+                <el-collapse-item>
+                    <div class="collapse-title" slot="title">
+                        问题
+                    </div>
                     <el-form>
-                        <!-- 标题编辑 -->
+                        <!-- 标题 -->
                         <el-form-item label="标题">
-                            <el-input v-model="curQuestion.title" />
-                        </el-form-item>
-                        <!-- 图片区域 -->
-                        <el-form-item label="图片">
+                            <!-- <el-input v-model="curQuestion.title" /> -->
                             <br>
+                            {{ curQuestion.title }}
+                        </el-form-item>
+
+                        <!-- 图片区域 -->
+                        <el-form-item v-if="getCurQuestionImages.length !== 0" label="图片">
+                            <br>
+
                             <!-- 公告图片 -->
                             <div class="image-container" v-for="(img, index) in getCurQuestionImages" :key="index">
                                 <el-image @error.once="setCurQuestionImageErr()"
@@ -77,12 +80,10 @@
                                         <i class="el-icon-loading error-icon"></i>
                                     </div>
                                 </el-image>
-                                <div class="close-button" @click="closeQuestionImage(curQuestionImages, index)">
-                                    <span class="close-button-icon">×</span>
-                                </div>
                             </div>
+
                             <!-- 上传区域 -->
-                            <div class="upload-container">
+                            <!-- <div class="upload-container">
                                 <el-image class="upload-image">
                                     <div slot="error">
                                         <input type="file" ref="questionFileInput" @change="handleQuestionFileChange"
@@ -94,11 +95,12 @@
                                         </div>
                                     </div>
                                 </el-image>
-                            </div>
+                            </div> -->
                         </el-form-item>
                         <!-- 内容编辑 -->
                         <el-form-item label="问题描述">
-                            <el-input type="textarea" v-model="curQuestion.description" />
+                            <v-md-editor class="description" :value="curQuestion.description"
+                                mode="preview"></v-md-editor>
                         </el-form-item>
                     </el-form>
                 </el-collapse-item>
@@ -106,7 +108,10 @@
 
             <!-- 回答 -->
             <el-collapse>
-                <el-collapse-item title="答案">
+                <el-collapse-item title="回答">
+                    <div class="collapse-title" slot="title">
+                        回答
+                    </div>
                     <el-form>
                         <!-- 图片区域 -->
                         <el-form-item label="图片">
@@ -142,8 +147,11 @@
                             </div>
                         </el-form-item>
                         <!-- 答案编辑 -->
-                        <el-form-item label="答案">
-                            <el-input type="textarea" v-model="curQuestion.ansDescription" />
+                        <el-form-item label="回答">
+                            <v-md-editor
+                                left-toolbar="undo redo clear | h bold italic strikethrough quote | link code | emoji"
+                                v-model="curQuestion.ansDescription" height="200px">
+                            </v-md-editor>
                         </el-form-item>
                     </el-form>
                 </el-collapse-item>
@@ -255,14 +263,21 @@ export default {
             }
         },
         editQuestion(question, index) {
+            this.curAnswerAddedImages = []
+            this.answerImagesToBeRemoved = []
+
             this.dialogVisible = true;
             this.curQuestion = { ...question };
             if (question.imgs !== null) {
                 this.curQuestionOldImages = Object.values(question.imgs)
+            } else {
+                this.curQuestionOldImages = []
             }
             this.curQuestionIndex = index
             if (question.ansImgs !== null) {
                 this.curAnswerOldImages = Object.values(question.ansImgs)
+            } else {
+                this.curAnswerOldImages = []
             }
         },
         handleQuestionFileChange(event) {
@@ -297,6 +312,7 @@ export default {
         uploadAnswerImage() {
             this.$refs.answerFileInput.click();
         },
+        /*
         closeQuestionImage(imgsList, index) {
             const removedImg = imgsList[index]
             const closedImage = this.curQuestionImages[index];
@@ -312,6 +328,7 @@ export default {
                 this.questionImagesToBeRemoved.push(removedImg)
             }
         },
+        */
         closeAnswerImage(imgsList, index) {
             const removedImg = imgsList[index]
             const closedImage = this.curAnswerImages[index];
@@ -330,9 +347,16 @@ export default {
         cancelEditing() {
             this.dialogVisible = false
             this.questionImagesToBeRemoved = [],
-            this.answerImagesToBeRemoved = []
+                this.answerImagesToBeRemoved = []
             this.curQuestionAddedImage = [],
-            this.curAnswerAddedImages = []
+                this.curAnswerAddedImages = []
+        },
+        closeDialog() {
+            const imagesPreviewExists = document.getElementsByClassName('el-image-viewer__wrapper')[0];
+            console.log(imagesPreviewExists);
+            if (!imagesPreviewExists) {
+                this.dialogVisible = false
+            }
         },
         update(questionIndex) {
             this.dialogVisible = false;
@@ -378,7 +402,7 @@ export default {
             return images;
         },
         deleteQuestion(index) {
-            this.$confirm("此操作将永久删除该公告, 是否继续?", "提示", {
+            this.$confirm("此操作将永久删除该问题, 是否继续?", "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
                 type: "warning",
@@ -419,6 +443,17 @@ export default {
     }
 }
 
+::v-deep .el-collapse-item {
+    .el-collapse-item__content {
+        padding-bottom: 0;
+    }
+
+    .el-image-viewer__canvas img {
+        max-height: 80% !important;
+        max-width: 80% !important;
+    }
+}
+
 .add-icon {
     position: absolute;
     top: -20px;
@@ -432,6 +467,8 @@ export default {
     display: inline-flex;
     margin-right: 10px;
     margin-bottom: 10px;
+    border: grey 2px solid;
+    border-radius: 10px;
 }
 
 .error-image-alt,
@@ -454,6 +491,8 @@ export default {
     display: inline-flex;
     margin-right: 5px;
     margin-bottom: 5px;
+    border: grey 2px solid;
+    border-radius: 10px;
 }
 
 .collapse-error-icon {
@@ -492,12 +531,6 @@ export default {
     margin-bottom: 5px;
     border: 2px dashed grey;
     border-radius: 10px;
-    /* text-align: center;
-  justify-content: center;
-  color: #409EFF;
-  font-size: 1.5em;
-  font-weight: bold;
-  top: 2px; */
 }
 
 .upload-button {
@@ -507,28 +540,17 @@ export default {
     margin-left: 40px;
 }
 
-/* 
-.upload-button {
-  position: relative;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  border: 2px solid grey;
-  align-content: center;
-  color: grey;
-  cursor: pointer;
-  top: 45px;
-}
-
-.upload-icon {
-  cursor: pointer;
-} */
-
 .close-button-icon {
     position: absolute;
     top: -12px;
     right: 4px;
     color: white;
     cursor: pointer;
+}
+
+::v-deep .description {
+    .vuepress-markdown-body {
+        padding: 10px 40px 10px 0;
+    }
 }
 </style>

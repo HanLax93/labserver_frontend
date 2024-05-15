@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" v-loading="listLoading">
     <el-table :data="list" fit highlight-current-row>
-      <el-table-column align="center" label="容器id" width="210">
+      <el-table-column align="center" label="容器id" width="150">
         <template slot-scope="scope">
           {{ scope.row.dockerID }}
         </template>
@@ -11,9 +11,24 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column label="端口" align="center" width="200">
+      <el-table-column label="端口" align="center">
         <template slot-scope="scope">
-          {{ scope.row.port }}
+          <el-tag style="margin:0 0 0 5px;">
+            <i>SSH:</i>
+            {{ scope.row.ports[0] }}
+          </el-tag>
+          <el-tag type="success" style="margin:0 0 5px 5px;">
+            <i>Jupyter:</i>
+            {{ scope.row.ports[1] }}
+          </el-tag>
+          <el-tag type="warning" style="margin:0 0 5px 5px;">
+            <i>Vnc:</i>
+            {{ scope.row.ports[2] }}
+          </el-tag>
+          <el-tag type="info" style="margin:0 0 5px 5px;">
+            <i>tensorboard:</i>
+            {{ scope.row.ports[3] }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="创建时间" prop="create_at" align="center" width="250">

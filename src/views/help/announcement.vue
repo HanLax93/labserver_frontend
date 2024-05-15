@@ -12,7 +12,7 @@
             v-if="permission === 1" @click="editThread(announcement, index)" @click.stop.prevent="openCollapse" />
           <el-button style="margin: 10px 0 10px 10px" icon="el-icon-delete" size="mini" type="danger" title="删除"
             @click.stop.prevent="openCollapse()" @click="deleteThread(index)" v-if="permission === 1" />
-          </div>
+        </div>
         <!-- 公告图片 -->
         <div class="collapse-image-container" v-show="checkImgs(announcement.imgs)"
           v-for="(img, index) in announcement.imgs">
@@ -24,14 +24,12 @@
             </div>
           </el-image>
         </div>
-        <div>
-          {{ announcement.description }}
-        </div>
+        <v-md-editor class="description" :value="announcement.description" mode="preview"></v-md-editor>
       </el-collapse-item>
     </el-collapse>
 
     <!-- edit dialog -->
-    <el-dialog title="编辑公告" :visible.sync="dialogVisible" width="30%">
+    <el-dialog title="编辑公告" :visible.sync="dialogVisible" width="45%" top="8vh" :before-close="closeDialog">
       <el-form>
         <!-- 可见性编辑 -->
         <el-form-item label="仅管理员可见">
@@ -49,7 +47,8 @@
           <!-- 公告图片 -->
           <div class="image-container" v-for="(img, index) in getCurAnnouncementImages" :key="index">
             <el-image @error.once="editSetError()" :class="{ 'edit-area-image-alt': editAreaErrorImageContainer }"
-              fit="cover" style="border-radius: 10px;" :src="resolveImage(img)" :preview-src-list="resolveImageList(getCurAnnouncementImages)">
+              fit="cover" style="border-radius: 10px;" :src="resolveImage(img)"
+              :preview-src-list="resolveImageList(getCurAnnouncementImages)">
               <div slot="error" class="image-slot">
                 <i class="el-icon-loading error-icon"></i>
               </div>
@@ -70,13 +69,18 @@
                 </div>
               </div>
             </el-image>
-            <!-- <div class="upload-button" @click="uploadImage()">
-            </div> -->
           </div>
         </el-form-item>
         <!-- 内容编辑 -->
-        <el-form-item label="内容">
+        <!-- <el-form-item label="内容">
           <el-input type="textarea" v-model="curAnnouncement.description" />
+        </el-form-item> -->
+
+        <!-- 内容编辑 -->
+        <el-form-item label="内容">
+          <v-md-editor left-toolbar="undo redo clear | h bold italic strikethrough quote | link code | emoji"
+            v-model="curAnnouncement.description" height="200px">
+          </v-md-editor>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -99,6 +103,7 @@ export default {
       dialogVisible: false,
       errorImageContainer: false,
       editAreaErrorImageContainer: false,
+      test: '',
 
       // 编辑公告
       selectedFile: null,
@@ -156,10 +161,16 @@ export default {
       this.dialogVisible = true;
     },
     editThread(announcement, index) {
+      this.curAnnouncementAddedImages = []
+      this.imagesToBeRemoved = []
       // 显示对话框
       this.dialogVisible = true
       this.curAnnouncement = { ...announcement };
-      this.curAnnouncementOldImages = Object.values(announcement.imgs)
+      if (announcement.imgs !== null) {
+        this.curAnnouncementOldImages = Object.values(announcement.imgs)
+      } else {
+        this.curAnnouncementOldImages = []
+      }
       this.curAnnouncementIndex = index
     },
     deleteThread(threadIndex) {
@@ -206,7 +217,13 @@ export default {
     cancelEditing() {
       this.dialogVisible = false
       this.imagesToBeRemoved = [],
-      this.curAnnouncementAddedImages = []
+        this.curAnnouncementAddedImages = []
+    },
+    closeDialog() {
+      const imagesPreviewExists = document.getElementsByClassName('el-image-viewer__wrapper')[0];
+      if (!imagesPreviewExists) {
+        this.dialogVisible = false
+      }
     },
     base64ToBlob(base64) {
       const parts = base64.split(';base64,');
@@ -281,12 +298,23 @@ export default {
 
 <style scoped>
 ::v-deep .collapse-title {
-    flex: 1 0 90%;
-    order: 1;
+  flex: 1 0 90%;
+  order: 1;
 
-    .el-collapse-item__header {
-        flex: 1 0 auto;
-        order: -1;
+  .el-collapse-item__header {
+    flex: 1 0 auto;
+    order: -1;
+  }
+}
+
+::v-deep .el-collapse-item, ::v-deep .el-form-item {
+    .el-collapse-item__content {
+        padding-bottom: 0;
+    }
+
+    .el-image-viewer__canvas img {
+        max-height: 80% !important;
+        max-width: 80% !important;
     }
 }
 
@@ -303,6 +331,8 @@ export default {
   display: inline-flex;
   margin-right: 10px;
   margin-bottom: 10px;
+  border: grey 2px solid;
+  border-radius: 10px;
 }
 
 .error-image-alt,
@@ -325,12 +355,14 @@ export default {
   display: inline-flex;
   margin-right: 5px;
   margin-bottom: 5px;
+  border: grey 2px solid;
+  border-radius: 10px;
 }
 
 .collapse-error-icon {
-    position: relative;
-    top: 90px;
-    left: 90px;
+  position: relative;
+  top: 90px;
+  left: 90px;
 }
 
 .error-icon {
@@ -363,12 +395,6 @@ export default {
   margin-bottom: 5px;
   border: 2px dashed grey;
   border-radius: 10px;
-  /* text-align: center;
-  justify-content: center;
-  color: #409EFF;
-  font-size: 1.5em;
-  font-weight: bold;
-  top: 2px; */
 }
 
 .upload-button {
@@ -378,28 +404,17 @@ export default {
   margin-left: 40px;
 }
 
-/* 
-.upload-button {
-  position: relative;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  border: 2px solid grey;
-  align-content: center;
-  color: grey;
-  cursor: pointer;
-  top: 45px;
-}
-
-.upload-icon {
-  cursor: pointer;
-} */
-
 .close-button-icon {
   position: absolute;
   top: -12px;
   right: 4px;
   color: white;
   cursor: pointer;
+}
+
+::v-deep .description {
+  .vuepress-markdown-body {
+    padding: 10px 40px 10px 0;
+  }
 }
 </style>
