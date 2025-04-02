@@ -160,13 +160,15 @@ export default {
         author: "",
         title: "",
         imgs: [],
-        forAdmin: 0
+        forAdmin: 0,
+        description: ""
       },
       announcement: {
         author: "",
         title: "",
         imgs: [],
-        forAdmin: 0
+        forAdmin: 0,
+        description: ""
       },
 
       // 新增问题
@@ -177,7 +179,8 @@ export default {
         author: "",
         title: "",
         imgs: [],
-        forAdmin: 0
+        forAdmin: 0,
+        description: ""
       },
       permission: 0
     };
@@ -226,13 +229,13 @@ export default {
     addThread() {
       this.announcementCachedImages = []
       this.announcementCachedImgsPreviewList = []
-      this.announcement = this.emptyAnnouncement
+      this.announcement = { ...this.emptyAnnouncement }
       this.threadDialogVisible = true;
     },
     addQuestion() {
       this.questionCachedImages = []
       this.questionCachedImagesPreviewList = []
-      this.question = this.emptyAnnouncement
+      this.question = { ...this.emptyAnnouncement }
       this.QADialogVisible = true;
     },
     base64ToBlob(base64) {
@@ -276,6 +279,14 @@ export default {
     },
     save() {
       this.threadDialogVisible = false;
+      if (this.announcement.title === "" || this.announcement.description === "") {
+        this.$message({
+          message: "标题和内容不能为空",
+          type: "error",
+        });
+        return;
+      }
+
       api_1.updateAnnouncement(null, this.resolveImages(this.announcementCachedImages), this.announcement).then((res) => {
         if (res.code === 20000) {
           this.$message({
@@ -290,13 +301,21 @@ export default {
           });
         }
         // 处理本地缓存
-        this.announcement = this.emptyAnnouncement
+        this.announcement = { ...this.emptyAnnouncement }
         this.announcementCachedImages = [];
         this.announcementCachedImgsPreviewList = [];
       });
     },
     saveQuestion() {
       this.QADialogVisible = false;
+      if (this.question.title === "" || this.question.description === "") {
+        this.$message({
+          message: "标题和内容不能为空",
+          type: "error",
+        });
+        return;
+      }
+
       api_1.saveQuestion(this.resolveImages(this.questionCachedImages), this.question).then((res) => {
         if (res.code === 20000) {
           this.$message({
@@ -312,7 +331,7 @@ export default {
         }
         this.questionCachedImages = []
         this.questionCachedImagesPreviewList = []
-        this.question = this.emptyAnnouncement
+        this.question = { ...this.emptyAnnouncement }
       });
     },
     handleFileChange(event) {

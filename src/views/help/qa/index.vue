@@ -8,8 +8,8 @@
                     </div>
                     <i style="margin-left: 5px; color: grey; font-size: 1.2em" class="header-icon el-icon-user">{{
                         question.author }}</i>
-                    <el-button style="margin: 10px 0 10px 10px;" icon="el-icon-edit" size="mini" plain title="编辑"
-                        v-if="permission === 1" @click.stop.prevent="openCollapse()"
+                    <el-button style="margin: 10px 0 10px 10px;" icon="el-icon-chat-line-round" size="mini"
+                        type="primary" title="回答" v-if="permission === 1" @click.stop.prevent="openCollapse()"
                         @click="editQuestion(question, index)" />
                     <el-button style="margin: 10px 0 10px 10px" icon="el-icon-delete" size="mini" type="danger"
                         title="删除" @click.stop.prevent="openCollapse()" @click="deleteQuestion(index)"
@@ -30,7 +30,7 @@
                 <el-collapse v-if="question.ansDescription !== null">
                     <el-collapse-item>
                         <div slot="title" class="collapse-title">
-                            <div style="font-size: 1.2em; color: skyblue; display: inline-block;">
+                            <div style="font-size: 1.2em; color: gray; display: inline-block;">
                                 回答
                             </div>
                         </div>
@@ -268,6 +268,9 @@ export default {
 
             this.dialogVisible = true;
             this.curQuestion = { ...question };
+            if (this.curQuestion.ansDescription === null) {
+                this.curQuestion.ansDescription = ''
+            }
             if (question.imgs !== null) {
                 this.curQuestionOldImages = Object.values(question.imgs)
             } else {

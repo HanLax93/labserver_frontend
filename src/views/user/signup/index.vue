@@ -64,11 +64,7 @@ export default {
         entryYear: [{ required: true, trigger: 'blur', validator: validateEntryYear }],
       },
       loading: false,
-      notice: "申请成功, 登录查看进度（默认密码：000000）" + `<br/>`,
-      versionInfo: "容器默认信息：" + `<br/>` + "cuda: 11.3" + `<br/>` + "cudnn: 8" + `<br/>` + "ubuntu: 20.04" + `<br/>` + "anaconda: 2023.07-0" + `<br/>`,
-      userInfo: "用户默认信息：" + `<br/>` + "用户名: stu" + `<br/>` + "密码: 000000" + `<br/>`,
-      importantInfo: '<p style="color: red;">注意事项：请将项目文件放置于 /home/stu/workspace 目录下，放在其他目录文件可能丢失</p>',
-      alert: this.notice + this.versionInfo + this.userInfo + this.importantInfo
+      alert: "登录密码：000000<br>请登录系统查看申请进度，查看帮助页面获取详细信息！"
     }
   },
   methods: {
@@ -85,7 +81,7 @@ export default {
             .then(response => {
               this.loading = false
               if (response.code === 20000) {
-                this.$alert(this.notice + this.versionInfo + this.userInfo + this.importantInfo, '提示', {
+                this.$alert(this.alert, '提示', {
                   confirmButtonText: '确定',
                   dangerouslyUseHTMLString: true,
                   callback: action => {

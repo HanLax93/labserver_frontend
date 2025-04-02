@@ -50,7 +50,7 @@ module.exports = {
         }
       },
       '/prod-api': {
-        target: '10.128.26.102:8403',
+        target: '10.131.169.156:8403',
         changeOrigin: true,
         pathRewrite: {
           '^/prod-api': ''
